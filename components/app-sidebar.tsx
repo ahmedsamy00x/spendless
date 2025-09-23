@@ -1,4 +1,5 @@
 import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
+import { Card } from "iconsax-reactjs";
 
 import {
   Sidebar,
@@ -16,34 +17,19 @@ import Link from "next/link";
 const items = [
   {
     title: "Dashboard",
-    url: "#",
+    url: "/",
     icon: Home,
   },
   {
-    title: "Inbox",
-    url: "#",
-    icon: Inbox,
-  },
-  {
-    title: "Calendar",
-    url: "#",
-    icon: Calendar,
-  },
-  {
-    title: "Search",
-    url: "#",
-    icon: Search,
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
+    title: "Subscriptions",
+    url: "/dashboard/subscriptions",
+    icon: Card,
   },
 ];
 
 export function AppSidebar() {
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar className="" collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>SpendLess</SidebarGroupLabel>
