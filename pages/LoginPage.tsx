@@ -38,8 +38,11 @@ export default function LoginPage() {
       const res = await login(data);
 
       // Only create session if login was successful
-      if (res.session?.access_token) {
-        await createSession(res.session.access_token);
+      if (res.session?.access_token && res.session?.refresh_token) {
+        await createSession(
+          res.session.access_token,
+          res.session.refresh_token
+        );
         toast.success("Login successful");
         router.push("/dashboard");
       } else {

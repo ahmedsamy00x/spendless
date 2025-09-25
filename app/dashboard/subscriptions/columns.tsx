@@ -1,5 +1,7 @@
 "use client";
 
+import StatusTag from "@/components/StatusTag";
+import CategoryTag from "@/components/CategoryTag";
 import { ColumnDef } from "@tanstack/react-table";
 
 // This type is used to define the shape of our data.
@@ -22,6 +24,9 @@ export const columns: ColumnDef<Subscription>[] = [
   {
     accessorKey: "category",
     header: "Category",
+    cell: ({ row }) => {
+      return <CategoryTag category={row.original.category} />;
+    },
   },
   {
     accessorKey: "cost",
@@ -30,6 +35,9 @@ export const columns: ColumnDef<Subscription>[] = [
   {
     accessorKey: "status",
     header: "Status",
+    cell: ({ row }) => {
+      return <StatusTag status={row.original.status} />;
+    },
   },
   {
     accessorKey: "frequency",

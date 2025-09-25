@@ -11,7 +11,7 @@ export async function middleware(req: NextRequest) {
       const session = JSON.parse(hasSession);
       const now = new Date();
       const expiresAt = new Date(session.expiresAt);
-      isValidSession = expiresAt > now;
+      isValidSession = expiresAt > now && !!session.access_token;
     } catch {
       // Invalid session format
       isValidSession = false;

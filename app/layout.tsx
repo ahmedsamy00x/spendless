@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "sonner";
-
-import { Montserrat } from "next/font/google";
+import { Providers } from "@/components/providers";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -25,6 +22,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "SpendLess - Personal Finance Management",
   description: "Track your expenses and manage your finances efficiently",
+  icons: {
+    icon: "/Selection.png",
+  },
 };
 
 export default function RootLayout({
@@ -37,15 +37,7 @@ export default function RootLayout({
       <body
         className={`${montserrat.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-          <Toaster position="top-center" richColors />
-        </ThemeProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

@@ -41,3 +41,11 @@ export const login = async ({
 
   return data;
 };
+
+export const getUser = async () => {
+  const { data, error } = await supabase.auth.getUser();
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data;
+};
