@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { CalendarIcon, Loader2 } from "lucide-react";
-import dayjs from "dayjs";
+import dayjs, { ManipulateType } from "dayjs";
 
 import {
   SubscriptionsFormData,
@@ -42,7 +42,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import {
   createSubscription,
+  GET_SUBSCRIPTION_QUERY_KEY,
   GET_SUBSCRIPTIONS_QUERY_KEY,
+  updateSubscription,
 } from "@/services/api";
 import { getSession } from "@/lib/session";
 import { getUser } from "@/services/auth/auth";
@@ -50,15 +52,33 @@ import { useQueryClient } from "@tanstack/react-query";
 
 interface SubscriptionsFormProps {
   onSuccess?: () => void;
-  initialData?: Partial<SubscriptionsFormData>;
+  initialData?: Partial<SubscriptionsFormData> & { id?: string };
 }
 
 const SubscriptionsForm = ({
   onSuccess,
   initialData,
 }: SubscriptionsFormProps) => {
+  const [isEditMode, setIsEditMode] = useState(() => !!initialData);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const queryClient = useQueryClient();
+
+  const handleCalculateRenewalDate = (startDate: string, frequency: string) => {
+    if (!startDate || !frequency) return "";
+
+    const startDateObj = dayjs(startDate);
+    const unitMap = {
+      monthly: "month",
+      yearly: "year",
+      weekly: "week",
+      quarterly: "quarter",
+      one_time: "year",
+    };
+
+    const unit = unitMap[frequency as keyof typeof unitMap] || "month";
+    return startDateObj.add(1, unit as ManipulateType).format("YYYY-MM-DD");
+  };
 
   const form = useForm<SubscriptionsFormData>({
     resolver: zodResolver(subscriptionsSchema),
@@ -69,7 +89,6 @@ const SubscriptionsForm = ({
       status: initialData?.status ?? undefined,
       frequency: initialData?.frequency ?? undefined,
       start_date: initialData?.start_date ?? "",
-      renewal_date: initialData?.renewal_date ?? "",
     },
     mode: "onChange",
   });
@@ -79,10 +98,19 @@ const SubscriptionsForm = ({
     setIsSubmitting(true);
 
     try {
-      const { data: resData } = await createSubscription(data, user?.id);
+      data.renewal_date = handleCalculateRenewalDate(
+        data.start_date,
+        data.frequency
+      );
+      const { data: resData } = isEditMode
+        ? await updateSubscription(data, initialData?.id || "")
+        : await createSubscription(data, user?.id);
 
       queryClient.invalidateQueries({
         queryKey: [GET_SUBSCRIPTIONS_QUERY_KEY],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [GET_SUBSCRIPTION_QUERY_KEY],
       });
 
       toast.success("Subscription saved successfully! ");
@@ -275,9 +303,18 @@ const SubscriptionsForm = ({
                     <Calendar
                       mode="single"
                       selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date) =>
-                        field.onChange(date?.toISOString().split("T")[0])
-                      }
+                      onSelect={(date) => {
+                        if (date) {
+                          // Format date as YYYY-MM-DD in local timezone
+                          const year = date.getFullYear();
+                          const month = String(date.getMonth() + 1).padStart(
+                            2,
+                            "0"
+                          );
+                          const day = String(date.getDate()).padStart(2, "0");
+                          field.onChange(`${year}-${month}-${day}`);
+                        }
+                      }}
                       disabled={(date) =>
                         date > new Date() || date < new Date("1900-01-01")
                       }
@@ -292,7 +329,7 @@ const SubscriptionsForm = ({
           />
 
           {/* Renewal Date Field */}
-          <FormField
+          {/* <FormField
             control={form.control}
             name="renewal_date"
             render={({ field }) => (
@@ -334,7 +371,7 @@ const SubscriptionsForm = ({
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
 
           {/* Submit Button */}
           <Button

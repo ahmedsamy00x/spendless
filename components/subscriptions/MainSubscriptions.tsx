@@ -14,13 +14,32 @@ import {
 } from "../ui/dialog";
 import SubscriptionsForm from "@/app/dashboard/subscriptions/subscriptions-form";
 import { useGetSubscriptions } from "@/services/api";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 const MainSubscriptions = () => {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Get pagination and search params from URL
   const search = searchParams?.get("query") || "";
-  const { data, isLoading, error } = useGetSubscriptions({ search: search });
+  const page = parseInt(searchParams?.get("page") || "1");
+  const pageSize = parseInt(searchParams?.get("pageSize") || "10");
+
+  const { data, isLoading, error } = useGetSubscriptions({
+    search,
+    page,
+    pageSize,
+  });
   const [open, setOpen] = useState(false);
+
+  // Handle pagination changes
+  const handlePaginationChange = (newPage: number, newPageSize: number) => {
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    params.set("page", newPage.toString());
+    params.set("pageSize", newPageSize.toString());
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   if (isLoading) {
     return <div>loading</div>;
@@ -29,13 +48,21 @@ const MainSubscriptions = () => {
   if (!data) {
     return <div>No data</div>;
   }
+
+  const pagination = {
+    page,
+    pageSize,
+    total: data.total,
+    pageCount: data.pageCount,
+  };
+
   return (
     <div className="container w-full mx-auto py-10 space-y-4">
       <h1 className="text-2xl font-bold">Subscriptions</h1>
       <div className="flex items-center justify-between">
         <TableSearch showButton={false} />
 
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
           {/* <DialogTitle>Add Subscription</DialogTitle> */}
           <DialogTrigger>
             <Button>
@@ -44,11 +71,16 @@ const MainSubscriptions = () => {
             </Button>
           </DialogTrigger>
           <DialogContent>
-            <SubscriptionsForm />
+            <SubscriptionsForm onSuccess={() => setOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>
-      <DataTable columns={columns} data={data} />
+      <DataTable
+        columns={columns}
+        data={data.data}
+        pagination={pagination}
+        onPaginationChange={handlePaginationChange}
+      />
 
       {/* <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>

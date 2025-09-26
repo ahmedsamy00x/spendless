@@ -3,17 +3,14 @@
 import StatusTag from "@/components/StatusTag";
 import CategoryTag from "@/components/CategoryTag";
 import { ColumnDef } from "@tanstack/react-table";
+import { Button } from "@/components/ui/button";
+import SubscriptionActions from "./subscription-actions";
+import { SubscriptionsFormData } from "@/lib/validations/subscriptions";
 
 // This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
-export type Subscription = {
+// Using the same type as the form for consistency
+export type Subscription = SubscriptionsFormData & {
   id: string;
-  name: string;
-  category: string;
-  cost: number;
-  status: string;
-  frequency: string;
-  renewal_date: string;
 };
 
 export const columns: ColumnDef<Subscription>[] = [
@@ -46,5 +43,12 @@ export const columns: ColumnDef<Subscription>[] = [
   {
     accessorKey: "renewal_date",
     header: "Renewal Date",
+  },
+  {
+    accessorKey: "actions",
+    header: "Actions",
+    cell: ({ row }) => {
+      return <SubscriptionActions subscription={row.original} />;
+    },
   },
 ];

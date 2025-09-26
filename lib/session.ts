@@ -1,8 +1,10 @@
 "use server";
 import { cookies } from "next/headers";
 
+const EXPIRES_AT = 60 * 60 * 1000;
+
 export async function createSession(accessToken: string, refreshToken: string) {
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  const expiresAt = new Date(Date.now() + EXPIRES_AT);
 
   const session = {
     access_token: accessToken,

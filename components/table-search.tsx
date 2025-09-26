@@ -20,6 +20,8 @@ const TableSearch = ({ showButton = false }) => {
     } else {
       params.delete("query");
     }
+    // Reset pagination when searching
+    params.set("page", "1");
     replace(`${pathname}?${params.toString()}`);
   };
 
@@ -27,6 +29,8 @@ const TableSearch = ({ showButton = false }) => {
     setSearch("");
     const params = new URLSearchParams(searchParams?.toString() || "");
     params.delete("query");
+    // Reset pagination when clearing search
+    params.set("page", "1");
     replace(`${pathname}?${params.toString()}`);
   };
 

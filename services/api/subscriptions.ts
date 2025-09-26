@@ -14,3 +14,30 @@ export const createSubscription = async (
   }
   return { data, status };
 };
+
+export const updateSubscription = async (
+  subscription: SubscriptionsFormData,
+  id: string
+) => {
+  const supabase = await createServerClient();
+  const { data, error, status } = await supabase
+    .from("subscriptions")
+    .update(subscription)
+    .eq("id", id);
+  if (error) {
+    throw new Error(error.message);
+  }
+  return { data, status };
+};
+
+export const deleteSubscription = async (id: string) => {
+  const supabase = await createServerClient();
+  const { data, error, status } = await supabase
+    .from("subscriptions")
+    .delete()
+    .eq("id", id);
+  if (error) {
+    throw new Error(error.message);
+  }
+  return { data, status };
+};

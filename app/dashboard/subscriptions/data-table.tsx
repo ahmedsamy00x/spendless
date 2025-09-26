@@ -15,20 +15,39 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    pageCount: number;
+  };
+  onPaginationChange: (page: number, pageSize: number) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  pagination,
+  onPaginationChange,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
+    pageCount: pagination.pageCount,
   });
 
   return (
@@ -75,6 +94,58 @@ export function DataTable<TData, TValue>({
           )}
         </TableBody>
       </Table>
+
+      {/* Server-side Pagination */}
+      {pagination.pageCount > 1 && (
+        <div className="py-4">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() =>
+                    onPaginationChange(pagination.page - 1, pagination.pageSize)
+                  }
+                  className={
+                    pagination.page <= 1
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+
+              {Array.from({ length: pagination.pageCount }, (_, index) => {
+                const pageNumber = index + 1;
+                return (
+                  <PaginationItem key={index}>
+                    <PaginationLink
+                      onClick={() =>
+                        onPaginationChange(pageNumber, pagination.pageSize)
+                      }
+                      isActive={pageNumber === pagination.page}
+                      className="cursor-pointer"
+                    >
+                      {pageNumber}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() =>
+                    onPaginationChange(pagination.page + 1, pagination.pageSize)
+                  }
+                  className={
+                    pagination.page >= pagination.pageCount
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
     </div>
   );
 }
