@@ -6,9 +6,9 @@ export const GET_SUBSCRIPTIONS_QUERY_KEY = "subscriptions";
 export const GET_SUBSCRIPTION_QUERY_KEY = "subscription";
 
 interface GetSubscriptionsParams {
-  search: string;
-  page: number;
-  pageSize: number;
+  search?: string;
+  page?: number;
+  pageSize?: number;
 }
 
 const getSubscriptions = async ({
@@ -19,16 +19,16 @@ const getSubscriptions = async ({
   const supabase = await createServerClient();
 
   // Calculate offset for pagination
-  const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
+  const from = ((page || 1) - 1) * (pageSize || 10);
+  const to = from + (pageSize || 10) - 1;
 
-  let query = supabase
-    .from("subscriptions")
-    .select("*", { count: "exact" })
-    .range(from, to);
+  let query = supabase.from("subscriptions").select("*", { count: "exact" });
 
   if (search) {
     query = query.textSearch("name", search);
+  }
+  if (page && pageSize) {
+    query = query.range(from, to);
   }
 
   const { data, error, count } = await query;
@@ -42,7 +42,7 @@ const getSubscriptions = async ({
     total: count || 0,
     page,
     pageSize,
-    pageCount: Math.ceil((count || 0) / pageSize),
+    pageCount: Math.ceil((count || 0) / (pageSize || 10)),
   };
 };
 
