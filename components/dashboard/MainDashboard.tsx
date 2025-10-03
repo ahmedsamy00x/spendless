@@ -16,11 +16,12 @@ const MainDashboard = () => {
   //   ?.filter((subscription) => subscription.frequency === "annual")
   //   .reduce((acc, subscription) => acc + subscription.cost, 0);
 
-  const totalUpcomingRenewals = data?.data?.filter(
-    (subscription) =>
-      subscription.renewal_date &&
-      new Date(subscription.renewal_date) < new Date()
-  ).length;
+  const totalUpcomingRenewals =
+    data?.data?.filter(
+      (subscription) =>
+        subscription.renewal_date &&
+        new Date(subscription.renewal_date) < new Date()
+    ).length || 0;
   const totalAverageMonthlyCost =
     data?.data?.reduce((acc, subscription) => acc + subscription.cost, 0) /
     (data?.data?.length || 0);
