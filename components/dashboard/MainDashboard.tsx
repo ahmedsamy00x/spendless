@@ -1,13 +1,56 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import DashboardStatsCard from "./DashboardStatsCard";
 import PieChartComponent from "./PieChart";
 import { useGetSubscriptions } from "@/services/api";
 import DashboardLoader from "../DashboardLoader";
+import RecentActivities from "./RecentActivities";
+import { DataTable } from "@/app/dashboard/subscriptions/data-table";
+import { columns } from "@/app/dashboard/subscriptions/columns";
+import dayjs from "dayjs";
+import DashboardWidgetTitle from "./DashboardWidgetTitle";
 
 const MainDashboard = () => {
   const { data, isLoading, error } = useGetSubscriptions({});
+
+  const upcomingRenewalsData = useMemo(() => {
+    return data?.data?.filter((subscription) => {
+      if (!subscription.renewal_date) return false;
+
+      const daysUntilRenewal = dayjs(subscription.renewal_date).diff(
+        dayjs(),
+        "days"
+      );
+
+      console.log({
+        name: subscription.name,
+        renewal_date: subscription.renewal_date,
+        daysUntilRenewal,
+        passes: daysUntilRenewal >= 0 && daysUntilRenewal <= 30,
+      });
+
+      return daysUntilRenewal >= 0 && daysUntilRenewal <= 30;
+    });
+  }, [data]);
+
+  console.log(upcomingRenewalsData, "upcomingRenewalsData");
+
+  const chartData = useMemo(() => {
+    const categoryTotals = data?.data?.reduce((acc, subscription) => {
+      acc[subscription.category] =
+        (acc[subscription.category] || 0) + subscription.cost;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(categoryTotals || {}).map(([name, value]) => ({
+      name,
+      value,
+      fill: `hsl(var(--category-${name.toLowerCase()}))`,
+    }));
+  }, [data]);
+
+  console.log(chartData, "chartData");
 
   const totalMonthlySpend = data?.data
     ?.filter((subscription) => subscription.frequency === "monthly")
@@ -17,11 +60,13 @@ const MainDashboard = () => {
   //   .reduce((acc, subscription) => acc + subscription.cost, 0);
 
   const totalUpcomingRenewals =
-    data?.data?.filter(
-      (subscription) =>
-        subscription.renewal_date &&
-        new Date(subscription.renewal_date) < new Date()
-    ).length || 0;
+    data?.data?.filter((subscription) => {
+      const daysUntilRenewal = dayjs(subscription.renewal_date).diff(
+        dayjs(),
+        "days"
+      );
+      return daysUntilRenewal >= 0 && daysUntilRenewal <= 30;
+    }).length || 0;
   const totalAverageMonthlyCost =
     data?.data?.reduce((acc, subscription) => acc + subscription.cost, 0) /
     (data?.data?.length || 0);
@@ -30,7 +75,7 @@ const MainDashboard = () => {
   if (!data) return <div>No data</div>;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-8">
       <div className="space-y-2">
         <h1 className="font-montserrat text-3xl font-bold">
           Welcome back, John Doe
@@ -59,8 +104,23 @@ const MainDashboard = () => {
           isPrice
         />
       </div>
-      <div className="w-full h-[400px]">
-        <PieChartComponent />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="w-full border shadow-sm h-[400px] rounded-2xl p-4">
+          <PieChartComponent data={chartData} />
+        </div>
+        <RecentActivities data={data?.data} />
+      </div>
+
+      <div className="space-y-3">
+        <DashboardWidgetTitle
+          title="Upcoming Renewals"
+          description="Subscriptions due to renew in the next 30 days."
+        />
+        <DataTable
+          columns={columns}
+          data={upcomingRenewalsData || []}
+          showActions={false}
+        />
       </div>
     </div>
   );

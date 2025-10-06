@@ -1,4 +1,5 @@
 import {
+  Legend,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -20,6 +21,7 @@ type PieSectorData = {
   value?: number;
   paddingAngle?: number;
   dataKey?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload?: any;
 };
 
@@ -27,12 +29,12 @@ type PieSectorDataItem = React.SVGProps<SVGPathElement> &
   Partial<SectorProps> &
   PieSectorData;
 
-const data = [
-  { name: "Group A", value: 400 },
-  { name: "Group B", value: 300 },
-  { name: "Group C", value: 300 },
-  { name: "Group D", value: 200 },
-];
+// const data = [
+//   { name: "Group A", value: 400 },
+//   { name: "Group B", value: 300 },
+//   { name: "Group C", value: 300 },
+//   { name: "Group D", value: 200 },
+// ];
 
 const renderActiveShape = ({
   cx,
@@ -87,12 +89,12 @@ const renderActiveShape = ({
         fill="none"
       />
       <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
-      <text
+      {/* <text
         x={ex + (cos >= 0 ? 1 : -1) * 12}
         y={ey}
         textAnchor={textAnchor}
         fill="#333"
-      >{`PV ${value}`}</text>
+      >{`PV ${value}`}</text> */}
       <text
         x={ex + (cos >= 0 ? 1 : -1) * 12}
         y={ey}
@@ -106,18 +108,27 @@ const renderActiveShape = ({
   );
 };
 
-export default function PieChartComponent() {
+export default function PieChartComponent({
+  data,
+  showLegend = true,
+  legendPosition = "bottom",
+}: {
+  data: { name: string; value: number; fill: string }[];
+  showLegend?: boolean;
+  legendPosition?: "top" | "bottom" | "left" | "right";
+}) {
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <PieChart width={400} height={400}>
+      <PieChart width={500} height={500}>
+        <Legend />
         <Pie
           activeShape={renderActiveShape}
           data={data}
           cx="50%"
           cy="50%"
           innerRadius={60}
-          outerRadius={80}
-          fill="#8884d8"
+          outerRadius={85}
+          paddingAngle={8}
           dataKey="value"
         />
       </PieChart>

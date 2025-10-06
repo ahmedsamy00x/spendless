@@ -27,13 +27,14 @@ import {
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  pagination: {
+  pagination?: {
     page: number;
     pageSize: number;
     total: number;
     pageCount: number;
   };
-  onPaginationChange: (page: number, pageSize: number) => void;
+  onPaginationChange?: (page: number, pageSize: number) => void;
+  showActions?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -41,13 +42,17 @@ export function DataTable<TData, TValue>({
   data,
   pagination,
   onPaginationChange,
+  showActions = true,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
-    columns,
+    columns: showActions
+      ? columns
+      : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        columns.filter((column: any) => column.accessorKey !== "actions"),
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
-    pageCount: pagination.pageCount,
+    pageCount: pagination?.pageCount,
   });
 
   return (
@@ -96,13 +101,14 @@ export function DataTable<TData, TValue>({
       </Table>
 
       {/* Server-side Pagination */}
-      {pagination.pageCount > 1 && (
+      {pagination?.pageCount && pagination.pageCount > 1 && (
         <div className="py-4">
           <Pagination>
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
                   onClick={() =>
+                    onPaginationChange &&
                     onPaginationChange(pagination.page - 1, pagination.pageSize)
                   }
                   className={
@@ -119,6 +125,7 @@ export function DataTable<TData, TValue>({
                   <PaginationItem key={index}>
                     <PaginationLink
                       onClick={() =>
+                        onPaginationChange &&
                         onPaginationChange(pageNumber, pagination.pageSize)
                       }
                       isActive={pageNumber === pagination.page}
@@ -133,6 +140,7 @@ export function DataTable<TData, TValue>({
               <PaginationItem>
                 <PaginationNext
                   onClick={() =>
+                    onPaginationChange &&
                     onPaginationChange(pagination.page + 1, pagination.pageSize)
                   }
                   className={
