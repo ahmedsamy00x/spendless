@@ -106,7 +106,9 @@ const MainDashboard = () => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="w-full border shadow-sm h-[400px] rounded-2xl p-4">
-          <PieChartComponent data={chartData} />
+          <PieChartComponent
+            data={chartData as { name: string; value: number; fill: string }[]}
+          />
         </div>
         <RecentActivities data={data?.data} />
       </div>

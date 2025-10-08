@@ -1,4 +1,5 @@
 import supabase from "../supabase/client";
+import { createServerClient } from "../supabase/server";
 
 export const signup = async ({
   email,
@@ -42,7 +43,9 @@ export const login = async ({
   return data;
 };
 
+// Server-side only: Get authenticated user from session cookies
 export const getUser = async () => {
+  const supabase = await createServerClient();
   const { data, error } = await supabase.auth.getUser();
   if (error) {
     throw new Error(error.message);

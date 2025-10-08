@@ -7,7 +7,7 @@ const MainHeader = () => {
   return (
     <nav className="flex !w-screen h-16 items-center justify-end border-b px-8 bg-background">
       <div className="flex items-center gap-4">
-        <ThemeToggle />
+        {/* <ThemeToggle /> */}
         <HeaderMenu />
       </div>
     </nav>

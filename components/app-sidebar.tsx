@@ -1,4 +1,11 @@
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
+import {
+  BarChart,
+  Calendar,
+  Home,
+  Inbox,
+  Search,
+  Settings,
+} from "lucide-react";
 import { Card } from "iconsax-reactjs";
 import logo from "@/public/Selection.png";
 
@@ -26,6 +33,11 @@ const items = [
     title: "Subscriptions",
     url: "/dashboard/subscriptions",
     icon: Card,
+  },
+  {
+    title: "Analytics & Insights",
+    url: "/dashboard/insights",
+    icon: BarChart,
   },
 ];
 
